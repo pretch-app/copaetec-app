@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, MapPin, CalendarDays, FileText } from "lucide-react"
-import { getMatchById, getEventsByMatch } from "@/lib/queries"
+import { apiGet, apiGetOrNull } from "@/lib/api"
+import type { Match, MatchEvent } from "@/lib/types"
 import { TeamBadge } from "@/components/team-badge"
 import { formatDate, formatTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -13,10 +14,10 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
   const matchId = Number(id)
   if (Number.isNaN(matchId)) notFound()
 
-  const match = await getMatchById(matchId)
+  const match = await apiGetOrNull<Match>(`/api/matches/${matchId}`)
   if (!match) notFound()
 
-  const events = await getEventsByMatch(matchId)
+  const events = await apiGet<MatchEvent[]>(`/api/matches/${matchId}/events`)
   const allGoals = events.filter(e => ['goal', 'penalty_goal', 'own_goal'].includes(e.event_type))
   
   const goalsGrouped = allGoals.reduce((acc, g) => {

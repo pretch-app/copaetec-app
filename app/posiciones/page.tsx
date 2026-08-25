@@ -1,4 +1,5 @@
-import { getStandings, getTournamentSettings } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { StandingRow, TournamentSettings } from "@/lib/types"
 import { GroupStandings } from "@/components/group-standings"
 import { PageHeader } from "@/components/page-header"
 import { Info } from "lucide-react"
@@ -7,8 +8,8 @@ import { Info } from "lucide-react"
 
 export default async function PosicionesPage() {
   const [standings, settings] = await Promise.all([
-    getStandings(),
-    getTournamentSettings()
+    apiGet<StandingRow[]>("/api/standings"),
+    apiGet<TournamentSettings>("/api/settings"),
   ])
 
   return (

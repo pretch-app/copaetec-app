@@ -1,7 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Users, Shield } from "lucide-react"
-import { getTeams } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { Team } from "@/lib/types"
 import { PageHeader } from "@/components/page-header"
 import { TeamBadge } from "@/components/team-badge"
 import { cn } from "@/lib/utils"
@@ -9,7 +10,7 @@ import { cn } from "@/lib/utils"
 
 
 export default async function EquiposPage() {
-  const teams = await getTeams()
+  const teams = await apiGet<Team[]>("/api/teams")
 
   return (
     <>

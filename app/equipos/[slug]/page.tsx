@@ -2,7 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import { Shirt, User, Trophy, CalendarDays, Activity } from "lucide-react"
-import { getTeamBySlug, getPlayersByTeam, getMatchesByTeam, getStandings } from "@/lib/queries"
+import { apiGet, apiGetOrNull } from "@/lib/api"
+import type { Team, Player, Match, StandingRow } from "@/lib/types"
 import { MatchCard } from "@/components/match-card"
 import { TeamBadge } from "@/components/team-badge"
 import { PageHeader } from "@/components/page-header"
@@ -12,13 +13,13 @@ import { cn } from "@/lib/utils"
 
 export default async function TeamDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const team = await getTeamBySlug(slug)
+  const team = await apiGetOrNull<Team>(`/api/teams/slug/${slug}`)
   if (!team) notFound()
 
   const [players, matches, standings] = await Promise.all([
-    getPlayersByTeam(team.id),
-    getMatchesByTeam(team.id),
-    getStandings(),
+    apiGet<Player[]>(`/api/teams/${team.id}/players`),
+    apiGet<Match[]>(`/api/teams/${team.id}/matches`),
+    apiGet<StandingRow[]>("/api/standings"),
   ])
 
   const standing = standings.find((s) => s.team_id === team.id)

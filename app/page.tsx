@@ -1,7 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, CalendarDays, Trophy, Target, Users, PlayCircle } from "lucide-react"
-import { getMatches, getStandings, getTopScorers, getTournamentStats, getTournamentSettings, getAllNews } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { Match, StandingRow, Scorer, TournamentSettings, NewsWithAuthor, TournamentStats } from "@/lib/types"
 import { MatchCard } from "@/components/match-card"
 import { StandingsTable } from "@/components/standings-table"
 import { TeamBadge } from "@/components/team-badge"
@@ -15,12 +16,12 @@ import { cn } from "@/lib/utils"
 
 export default async function HomePage() {
   const [matches, standings, scorers, stats, settings, news] = await Promise.all([
-    getMatches(),
-    getStandings(),
-    getTopScorers(5),
-    getTournamentStats(),
-    getTournamentSettings(),
-    getAllNews(),
+    apiGet<Match[]>("/api/matches"),
+    apiGet<StandingRow[]>("/api/standings"),
+    apiGet<Scorer[]>("/api/scorers?limit=5"),
+    apiGet<TournamentStats>("/api/stats"),
+    apiGet<TournamentSettings>("/api/settings"),
+    apiGet<NewsWithAuthor[]>("/api/news"),
   ])
 
   const upcoming = matches.filter((m) => m.status === "scheduled").slice(0, 4)

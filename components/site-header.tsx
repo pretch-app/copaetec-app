@@ -17,7 +17,7 @@ const tournamentLinks = [
   { href: "/equipos", label: "Equipos" },
 ]
 
-export function SiteHeader({ user }: { user: { display_name: string; role: string } | null }) {
+export function SiteHeader() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -117,7 +117,7 @@ export function SiteHeader({ user }: { user: { display_name: string; role: strin
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <UserMenu user={user} />
+          <UserMenu />
           <button
             type="button"
             className="rounded-md p-2 hover:bg-foreground/10 lg:hidden transition-colors"

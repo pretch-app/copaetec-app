@@ -1,0 +1,59 @@
+"use client"
+
+import { apiUrl } from "./api"
+
+export type ApiResult<T = unknown> = { ok: true; data: T } | { ok: false; error: string; status: number }
+
+// Para Client Components: llama al backend con credenciales (cookie de sesión cross-origin).
+export async function apiClient<T = unknown>(
+  path: string,
+  options: { method?: string; body?: unknown; formData?: FormData } = {}
+): Promise<ApiResult<T>> {
+  const { method = "GET", body, formData } = options
+
+  const init: RequestInit = {
+    method,
+    credentials: "include",
+  }
+
+  if (formData) {
+    init.body = formData
+  } else if (body !== undefined) {
+    init.headers = { "Content-Type": "application/json" }
+    init.body = JSON.stringify(body)
+  }
+
+  try {
+    const res = await fetch(apiUrl(path), init)
+    const contentType = res.headers.get("content-type") || ""
+    const data = contentType.includes("application/json") ? await res.json() : null
+
+    if (!res.ok) {
+      return { ok: false, error: (data && data.error) || `Error ${res.status}`, status: res.status }
+    }
+    return { ok: true, data: data as T }
+  } catch (err) {
+    return { ok: false, error: "No se pudo conectar con el servidor", status: 0 }
+  }
+}
+
+export type CurrentUser = {
+  id: number
+  email: string
+  display_name: string
+  role: "user" | "admin"
+  created_at: string
+} | null
+
+export async function getMe(): Promise<CurrentUser> {
+  const result = await apiClient<{ user: CurrentUser }>("/api/auth/me")
+  return result.ok ? result.data.user : null
+}
+
+export async function logout() {
+  return apiClient("/api/auth/logout", { method: "POST" })
+}
+
+export function googleLoginUrl() {
+  return apiUrl("/api/auth/google")
+}

@@ -1,4 +1,5 @@
-import { getFinishedMatches } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { Match } from "@/lib/types"
 import { MatchCard } from "@/components/match-card"
 import { PageHeader } from "@/components/page-header"
 import { CalendarDays } from "lucide-react"
@@ -6,7 +7,7 @@ import { CalendarDays } from "lucide-react"
 
 
 export default async function ResultadosPage() {
-  const matches = await getFinishedMatches()
+  const matches = await apiGet<Match[]>("/api/matches/finished")
 
   const groupMatches = matches.filter((m) => !m.stage || m.stage === "group")
 

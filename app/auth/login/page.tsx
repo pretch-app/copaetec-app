@@ -1,18 +1,39 @@
 "use client"
 
-import { useActionState, Suspense } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { loginAction } from "@/app/auth/actions"
+import { useRouter, useSearchParams } from "next/navigation"
+import { apiClient, googleLoginUrl } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Trophy, Mail, Lock, AlertCircle, ChevronDown } from "lucide-react"
 
 function LoginContent() {
-  const [state, formAction, isPending] = useActionState(loginAction, undefined)
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, setIsPending] = useState(false)
+  const router = useRouter()
   const searchParams = useSearchParams()
   const errorParam = searchParams.get("error")
+
+  async function formAction(formData: FormData) {
+    setIsPending(true)
+    setError(null)
+    const result = await apiClient("/api/auth/login", {
+      method: "POST",
+      body: {
+        email: formData.get("email"),
+        password: formData.get("password"),
+      },
+    })
+    setIsPending(false)
+    if (!result.ok) {
+      setError(result.error)
+      return
+    }
+    router.push("/predicciones-etec")
+    router.refresh()
+  }
 
   let oauthErrorMessage = null
   if (errorParam === "DomainNotAllowed") {
@@ -45,8 +66,8 @@ function LoginContent() {
             </div>
           )}
 
-          <a 
-            href="/api/auth/google" 
+          <a
+            href={googleLoginUrl()}
             className="w-full h-12 font-bold text-base bg-white hover:bg-gray-100 text-black border border-gray-200 shadow-sm flex items-center justify-center gap-2 rounded-lg transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
@@ -100,9 +121,9 @@ function LoginContent() {
                 </div>
               </div>
               
-              {state?.error && (
+              {error && (
                 <p className="text-xs font-medium text-destructive text-center">
-                  {state.error}
+                  {error}
                 </p>
               )}
 

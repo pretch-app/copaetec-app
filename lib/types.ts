@@ -137,3 +137,12 @@ export type News = {
 export type NewsWithAuthor = News & {
   author_name: string | null
 }
+
+export type TournamentStats = {
+  totalGoals: number
+  totalMatches: number
+  avgGoalsPerMatch: number
+  bestAttack: { name: string; slug: string; goals_for: number } | null
+  bestDefense: { name: string; slug: string; goals_against: number } | null
+  biggestWin: Match | null
+}

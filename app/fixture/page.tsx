@@ -1,11 +1,12 @@
-import { getMatches } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { Match } from "@/lib/types"
 import { MatchCard } from "@/components/match-card"
 import { PageHeader } from "@/components/page-header"
 
 
 
 export default async function FixturePage() {
-  const matches = await getMatches()
+  const matches = await apiGet<Match[]>("/api/matches")
 
   const groupMatches = matches.filter((m) => !m.stage || m.stage === "group")
 

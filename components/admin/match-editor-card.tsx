@@ -15,7 +15,7 @@ import {
   deleteMatchAction,
   addMatchEventAction,
   deleteMatchEventAction,
-} from "@/app/admin/actions"
+} from "@/lib/admin-actions"
 
 function teamName(teams: Team[], id: number) {
   return teams.find((t) => t.id === id)?.name ?? "?"

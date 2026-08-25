@@ -4,7 +4,6 @@ import { Geist, Geist_Mono, Oswald } from "next/font/google"
 import { Suspense } from "react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { getCurrentUser } from "@/lib/auth"
 import { Toaster } from "sonner"
 import "./globals.css"
 
@@ -41,13 +40,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await getCurrentUser()
-
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${oswald.variable} dark`} suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground min-h-dvh flex flex-col font-sans">
@@ -55,7 +52,7 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}else{document.documentElement.classList.remove('light');document.documentElement.classList.add('dark');}}catch(e){}})()`
         }} />
-        <SiteHeader user={user} />
+        <SiteHeader />
         
         {/* Scroll Progress Bar */}
         <div className="fixed top-0 left-0 w-full h-1 z-[60] opacity-50 pointer-events-none hidden sm:block">

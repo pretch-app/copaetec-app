@@ -27,8 +27,10 @@ import {
   deleteNewsAction,
   deleteUserAction,
   autoGenerateGroupFixtureAction,
-} from "@/app/admin/actions"
-import { logoutAction } from "@/app/auth/actions"
+  autoGenerateBracketAction,
+} from "@/lib/admin-actions"
+import { logout } from "@/lib/api-client"
+import { useRouter } from "next/navigation"
 import type { Team, Player, Match, MatchEvent, GalleryItem, TournamentSettings, NewsWithAuthor, User } from "@/lib/types"
 import { TournamentConfig } from "@/components/admin/tournament-config"
 import { MatchEditorCard } from "./match-editor-card"
@@ -65,6 +67,14 @@ function wrapAction(action: Function, successMessage: string) {
 }
 
 export function AdminDashboard({ teams, players, matches, events, gallery, settings, news, users }: Props) {
+  const router = useRouter()
+
+  async function handleLogout() {
+    await logout()
+    router.push("/")
+    router.refresh()
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between gap-4 border-b border-border pb-6">
@@ -72,11 +82,9 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
           <h1 className="font-display text-3xl font-bold uppercase tracking-wide">Administración</h1>
           <p className="text-sm text-muted-foreground">Panel de control del torneo</p>
         </div>
-        <form action={logoutAction}>
-          <Button variant="outline" type="submit">
-            Cerrar sesión
-          </Button>
-        </form>
+        <Button variant="outline" type="button" onClick={handleLogout}>
+          Cerrar sesión
+        </Button>
       </div>
 
       <Tabs defaultValue="settings" orientation="vertical" className="flex flex-col md:flex-row gap-8">
@@ -204,10 +212,13 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                 Basado en tu configuración ({settings.num_teams_advancing} equipos clasifican), esto emparejará automáticamente a los mejores equipos de la tabla (1º vs Último, 2º vs Penúltimo, etc.) y creará los partidos.
               </p>
               <form action={async (formData) => {
-                const { autoGenerateBracketAction } = await import("@/app/admin/actions")
                 try {
-                  await autoGenerateBracketAction(formData)
-                  toast.success("Llaves generadas con éxito")
+                  const result = await autoGenerateBracketAction(formData)
+                  if (result?.error) {
+                    toast.error(result.error)
+                  } else {
+                    toast.success("Llaves generadas con éxito")
+                  }
                 } catch (e: any) {
                   toast.error(e.message)
                 }

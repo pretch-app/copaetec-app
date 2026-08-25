@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Target, Shield, Swords, Goal } from "lucide-react"
-import { getTopScorers, getTournamentStats } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { Scorer, TournamentStats } from "@/lib/types"
 import { PageHeader } from "@/components/page-header"
 import { TeamBadge } from "@/components/team-badge"
 import { cn } from "@/lib/utils"
@@ -8,7 +9,10 @@ import { cn } from "@/lib/utils"
 
 
 export default async function EstadisticasPage() {
-  const [scorers, stats] = await Promise.all([getTopScorers(15), getTournamentStats()])
+  const [scorers, stats] = await Promise.all([
+    apiGet<Scorer[]>("/api/scorers?limit=15"),
+    apiGet<TournamentStats>("/api/stats"),
+  ])
   
   // Find max goals for progress bar scaling
   const maxGoals = scorers.length > 0 ? Math.max(...scorers.map(s => s.goals)) : 0

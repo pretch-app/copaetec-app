@@ -1,4 +1,5 @@
-import { getNewsById } from "@/lib/queries"
+import { apiGetOrNull } from "@/lib/api"
+import type { NewsWithAuthor } from "@/lib/types"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
@@ -10,7 +11,7 @@ export const revalidate = 60
 
 export default async function NewsArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const news = await getNewsById(parseInt(id))
+  const news = await apiGetOrNull<NewsWithAuthor>(`/api/news/${parseInt(id)}`)
   
   if (!news) {
     notFound()

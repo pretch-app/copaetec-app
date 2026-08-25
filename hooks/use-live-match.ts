@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { Match } from "@/lib/types"
+import { apiUrl } from "@/lib/api"
 
 export function useLiveMatch(initialMatch: Match) {
   const [match, setMatch] = useState<Match>(initialMatch)
@@ -21,7 +22,7 @@ export function useLiveMatch(initialMatch: Match) {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch("/api/matches/live")
+        const res = await fetch(apiUrl("/api/matches/live"))
         if (res.ok) {
           const data = await res.json()
           const updatedMatch = data.find((m: any) => m.id === match.id)

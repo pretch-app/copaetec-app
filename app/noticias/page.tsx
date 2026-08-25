@@ -1,4 +1,5 @@
-import { getAllNews } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { NewsWithAuthor } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarIcon, UserIcon, ArrowRight } from "lucide-react"
 import Image from "next/image"
@@ -33,7 +34,7 @@ const badgeMap: Record<string, string> = {
 }
 
 export default async function NoticiasPage() {
-  const news = await getAllNews()
+  const news = await apiGet<NewsWithAuthor[]>("/api/news")
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">

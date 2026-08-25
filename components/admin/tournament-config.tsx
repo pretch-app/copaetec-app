@@ -4,10 +4,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { saveTournamentSettingsAction } from "@/app/admin/actions"
+import { saveTournamentSettingsAction } from "@/lib/admin-actions"
 import type { TournamentSettings } from "@/lib/types"
+import { toast } from "sonner"
 
 export function TournamentConfig({ settings }: { settings: TournamentSettings }) {
+  async function handleSubmit(formData: FormData) {
+    const result = await saveTournamentSettingsAction(formData)
+    if (result?.error) {
+      toast.error(result.error)
+    } else {
+      toast.success("Configuración guardada")
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <Card>
@@ -18,7 +28,7 @@ export function TournamentConfig({ settings }: { settings: TournamentSettings })
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={saveTournamentSettingsAction} className="grid gap-5">
+          <form action={handleSubmit} className="grid gap-5">
             <div className="flex flex-col gap-2 border-b border-border pb-5">
               <Label className="text-base font-semibold">Nombre del Torneo</Label>
               <Input name="tournament_name" defaultValue={settings.tournament_name || "Copa ETec 2026"} className="max-w-md" />

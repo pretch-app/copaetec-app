@@ -1,7 +1,7 @@
 "use client"
 
-import { useActionState, useRef, useEffect } from "react"
-import { submitPredictionAction } from "@/app/predicciones-etec/actions"
+import { useRef, useState } from "react"
+import { apiClient } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Match, Prediction } from "@/lib/types"
@@ -16,18 +16,26 @@ type PredictionCardProps = {
 
 export function PredictionCard({ match: initialMatch, prediction, disabled }: PredictionCardProps) {
   const match = useLiveMatch(initialMatch)
-  const [state, formAction, isPending] = useActionState(submitPredictionAction, undefined)
+  const [isPending, setIsPending] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
 
-  // Use useEffect to handle toasts on state change
-  useEffect(() => {
-    if (state?.success) {
+  async function formAction(formData: FormData) {
+    setIsPending(true)
+    const result = await apiClient("/api/predictions", {
+      method: "POST",
+      body: {
+        match_id: Number(formData.get("match_id")),
+        predicted_home: Number(formData.get("predicted_home")),
+        predicted_away: Number(formData.get("predicted_away")),
+      },
+    })
+    setIsPending(false)
+    if (result.ok) {
       toast.success("Predicción guardada")
+    } else {
+      toast.error(result.error)
     }
-    if (state?.error) {
-      toast.error(state.error)
-    }
-  }, [state])
+  }
 
   const isClosed = disabled || match.status === "finished" || (match.kickoff && Date.now() >= new Date(match.kickoff).getTime())
 
@@ -120,13 +128,6 @@ export function PredictionCard({ match: initialMatch, prediction, disabled }: Pr
               <span>{match.away_score ?? 0}</span>
             </div>
           </div>
-        )}
-
-        {state?.error && (
-          <p className="text-xs text-destructive font-medium hidden">{state.error}</p>
-        )}
-        {state?.success && (
-          <p className="text-xs text-primary font-medium hidden">Predicción actualizada</p>
         )}
 
         {!isClosed && (

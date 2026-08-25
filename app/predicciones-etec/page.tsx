@@ -1,31 +1,55 @@
-import { getCurrentUser } from "@/lib/auth"
-import { getUpcomingMatchesForProde, getPredictionsByUser } from "@/lib/queries"
+"use client"
+
+import { useEffect, useState } from "react"
+import { apiGet } from "@/lib/api"
+import { getMe, apiClient, type CurrentUser } from "@/lib/api-client"
+import type { Match, Prediction } from "@/lib/types"
 import { PageHeader } from "@/components/page-header"
 import { PredictionCard } from "@/components/prode/prediction-card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Target, Info } from "lucide-react"
 
-export const metadata = {
-  title: "Predicciones ETec | Copa ETec",
-}
+export default function ProdePage() {
+  const [user, setUser] = useState<CurrentUser>(null)
+  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([])
+  const [userPredictions, setUserPredictions] = useState<Prediction[]>([])
+  const [loaded, setLoaded] = useState(false)
 
-export default async function ProdePage() {
-  const user = await getCurrentUser()
-  const upcomingMatches = await getUpcomingMatchesForProde()
-  
-  let userPredictions: any[] = []
-  if (user) {
-    userPredictions = await getPredictionsByUser(user.id)
-  }
+  useEffect(() => {
+    async function load() {
+      const [me, matches] = await Promise.all([
+        getMe(),
+        apiGet<Match[]>("/api/predictions/upcoming"),
+      ])
+      setUser(me)
+      setUpcomingMatches(matches)
+      if (me) {
+        const result = await apiClient<Prediction[]>("/api/predictions/me")
+        if (result.ok) setUserPredictions(result.data)
+      }
+      setLoaded(true)
+    }
+    load()
+  }, [])
 
-  // Agrupar por fecha
   const matchesByMatchday = upcomingMatches.reduce((acc, match) => {
     const md = match.matchday || 0
     if (!acc[md]) acc[md] = []
     acc[md].push(match)
     return acc
   }, {} as Record<number, typeof upcomingMatches>)
+
+  if (!loaded) {
+    return (
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <PageHeader
+          title="Predicciones ETec Copa ETec"
+          subtitle="Predecí los resultados de los próximos partidos y sumá puntos para el ranking global."
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12 animate-in fade-in duration-500">
@@ -108,13 +132,13 @@ export default async function ProdePage() {
                 Fecha {matchday}
               </h2>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {matches.map((match: any) => {
-                  const prediction = userPredictions.find(p => p.match_id === match.id)
+                {matches.map((match) => {
+                  const prediction = userPredictions.find((p) => p.match_id === match.id)
                   return (
-                    <PredictionCard 
-                      key={match.id} 
-                      match={match} 
-                      prediction={prediction} 
+                    <PredictionCard
+                      key={match.id}
+                      match={match}
+                      prediction={prediction}
                       disabled={!user}
                     />
                   )

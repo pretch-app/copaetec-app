@@ -1,12 +1,13 @@
 import { Camera, Image as ImageIcon } from "lucide-react"
-import { getGallery } from "@/lib/queries"
+import { apiGet } from "@/lib/api"
+import type { GalleryItem } from "@/lib/types"
 import { PageHeader } from "@/components/page-header"
 import { GalleryGrid } from "@/components/gallery-grid"
 
 
 
 export default async function GaleriaPage() {
-  const photos = await getGallery()
+  const photos = await apiGet<GalleryItem[]>("/api/gallery")
 
   return (
     <>

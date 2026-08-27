@@ -1,28 +1,59 @@
-# copaetec
+# Copa ETec Frontend
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Frontend de la Copa ETec 2026 desarrollado con Next.js. Consume la API del proyecto hermano `copaetec-backend`.
 
-## Built with v0
+## Requisitos
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+- Node.js 20 o superior
+- `copaetec-backend` configurado con una base de datos Postgres
+- Credenciales de Google OAuth para el inicio de sesión
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_KVEc8U83kltE7AU5h8i7AdGhOfqr)
+## Configuración local
 
-## Getting Started
+En el backend, crea `copaetec-backend/.env.local` a partir de `.env.example` y completa las variables necesarias, especialmente `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
 
-First, run the development server:
+En este frontend, copia `.env.example` como `.env.local`:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Los archivos `.env*` locales están excluidos de Git. No subas credenciales al repositorio.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ejecución
+
+Inicia el backend en una terminal:
+
+```bash
+cd ../copaetec-backend
+npm install
+npm run dev
+```
+
+Inicia el frontend en otra terminal:
+
+```bash
+npm install
+npm run dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000).
+
+El backend corre en `http://localhost:4000` y el frontend en `http://localhost:3000`.
+
+## Google OAuth
+
+En Google Cloud Console, dentro de **APIs y servicios → Credenciales → ID de cliente OAuth 2.0**, agrega esta URI de redireccionamiento autorizada:
+
+```text
+http://localhost:4000/api/auth/callback/google
+```
+
+Si cambias el puerto del backend, actualiza también esta URI en Google Cloud y `NEXT_PUBLIC_API_URL`.
+
+## Desarrollo
+
+Puedes editar `app/page.tsx`; el servidor de desarrollo actualiza los cambios automáticamente.
 
 ## Learn More
 

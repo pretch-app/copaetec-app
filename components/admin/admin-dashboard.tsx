@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
+import Image from "next/image"
 import {
   createTeamAction,
   updateTeamAction,
@@ -44,29 +45,28 @@ type Props = {
   settings: TournamentSettings
   news: NewsWithAuthor[]
   users: User[]
+  onDataChange: () => Promise<void>
 }
 
-function teamName(teams: Team[], id: number) {
-  return teams.find((t) => t.id === id)?.name ?? "?"
-}
+type AdminAction = (formData: FormData) => Promise<{ error?: string; success?: boolean }>
 
-function wrapAction(action: Function, successMessage: string) {
+function wrapAction(action: AdminAction, successMessage: string, onSuccess: () => Promise<void>) {
   return async (formData: FormData) => {
     try {
       const result = await action(formData)
       if (result?.error) {
         toast.error(result.error)
       } else if (result?.success || result === undefined) {
-        // Fallback to success if result is undefined for older actions
         toast.success(successMessage)
+        await onSuccess()
       }
-    } catch (e: any) {
-      toast.error(e.message || "Ocurrió un error")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Ocurrió un error")
     }
   }
 }
 
-export function AdminDashboard({ teams, players, matches, events, gallery, settings, news, users }: Props) {
+export function AdminDashboard({ teams, players, matches, events, gallery, settings, news, users, onDataChange }: Props) {
   const router = useRouter()
 
   async function handleLogout() {
@@ -101,7 +101,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
 
         <div className="flex-1 min-w-0">
           <TabsContent value="settings" className="m-0 focus-visible:outline-none">
-            <TournamentConfig settings={settings} />
+             <TournamentConfig settings={settings} onDataChange={onDataChange} />
           </TabsContent>
 
           {/* MATCHES */}
@@ -111,7 +111,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <CardTitle className="text-lg">Nuevo partido</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={wrapAction(createMatchAction, "Partido creado correctamente")} className="grid gap-3 sm:grid-cols-2">
+              <form action={wrapAction(createMatchAction, "Partido creado correctamente", onDataChange)} className="grid gap-3 sm:grid-cols-2">
                 <input type="hidden" name="stage" value="group" />
                 <div className="flex flex-col gap-1">
                   <Label>Fecha (jornada)</Label>
@@ -163,11 +163,12 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <form action={async (formData) => {
                 try {
                   const result = await autoGenerateGroupFixtureAction(formData)
-                  if (result?.success) {
-                    toast.success("Fixture generado con éxito")
-                  }
-                } catch (e: any) {
-                  toast.error(e.message || "Ocurrió un error")
+                   if (result?.success) {
+                     toast.success("Fixture generado con éxito")
+                     await onDataChange()
+                   }
+                 } catch (e) {
+                   toast.error(e instanceof Error ? e.message : "Ocurrió un error")
                 }
               }} className="grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center space-x-2 sm:col-span-2">
@@ -197,7 +198,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
           </Card>
 
           {matches.filter(m => !m.stage || m.stage === "group").map((m) => (
-            <MatchEditorCard key={m.id} match={m} teams={teams} players={players} events={events} />
+             <MatchEditorCard key={m.id} match={m} teams={teams} players={players} events={events} onDataChange={onDataChange} />
           ))}
         </TabsContent>
 
@@ -218,9 +219,10 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                     toast.error(result.error)
                   } else {
                     toast.success("Llaves generadas con éxito")
+                    await onDataChange()
                   }
-                } catch (e: any) {
-                  toast.error(e.message)
+                 } catch (e) {
+                   toast.error(e instanceof Error ? e.message : "Ocurrió un error")
                 }
               }}>
                 <Button type="submit">Generar Llaves Automáticamente</Button>
@@ -233,7 +235,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <CardTitle className="text-lg">Agregar Partido Manualmente (opcional)</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={wrapAction(createMatchAction, "Partido de llaves creado")} className="grid gap-3 sm:grid-cols-2">
+              <form action={wrapAction(createMatchAction, "Partido de llaves creado", onDataChange)} className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1">
                   <Label>Fase de Eliminatoria</Label>
                   <select name="stage" className="h-9 rounded-md border border-input bg-background px-3 text-sm" required defaultValue="round_of_16">
@@ -283,7 +285,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
           </Card>
 
           {matches.filter(m => m.stage && m.stage !== "group").map((m) => (
-            <MatchEditorCard key={m.id} match={m} teams={teams} players={players} events={events} />
+             <MatchEditorCard key={m.id} match={m} teams={teams} players={players} events={events} onDataChange={onDataChange} />
           ))}
         </TabsContent>
 
@@ -295,9 +297,9 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
             </CardHeader>
             <CardContent>
               <p className="mb-4 text-sm text-muted-foreground">
-                <strong>Fase de grupos:</strong> Si quieres que el torneo tenga fase de grupos, simplemente asígnale el nombre del grupo (ej. "A", "B") a los equipos. La tabla de posiciones se dividirá automáticamente. Si lo dejas vacío, formarán parte de la Tabla General.
+                <strong>Fase de grupos:</strong> Si quieres que el torneo tenga fase de grupos, simplemente asígnale el nombre del grupo (ej. &quot;A&quot;, &quot;B&quot;) a los equipos. La tabla de posiciones se dividirá automáticamente. Si lo dejas vacío, formarán parte de la Tabla General.
               </p>
-              <form action={wrapAction(createTeamAction, "Equipo creado")} className="grid gap-3 sm:grid-cols-3">
+                <form action={wrapAction(createTeamAction, "Equipo creado", onDataChange)} className="grid gap-3 sm:grid-cols-3">
                 <div className="flex flex-col gap-1">
                   <Label>Nombre</Label>
                   <Input name="name" required />
@@ -320,7 +322,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
           {teams.map((t) => (
             <Card key={t.id}>
               <CardContent className="flex flex-col gap-4 pt-6">
-                <form action={wrapAction(updateTeamAction, "Equipo actualizado")} className="grid gap-3 sm:grid-cols-3">
+                <form action={wrapAction(updateTeamAction, "Equipo actualizado", onDataChange)} className="grid gap-3 sm:grid-cols-3">
                   <input type="hidden" name="id" value={t.id} />
                   <div className="flex flex-col gap-1">
                     <Label>Nombre</Label>
@@ -341,21 +343,21 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                   </div>
                 </form>
                 <div className="flex flex-wrap items-center gap-3">
-                  <form action={wrapAction(uploadTeamPhotoAction, "Foto subida")} className="flex items-center gap-2">
+                  <form action={wrapAction(uploadTeamPhotoAction, "Foto subida", onDataChange)} className="flex items-center gap-2">
                     <input type="hidden" name="id" value={t.id} />
                     <Input name="photo" type="file" accept="image/*" className="max-w-[200px]" required />
                     <Button type="submit" size="sm" variant="secondary">
                       Subir foto grupal
                     </Button>
                   </form>
-                  <form action={wrapAction(uploadTeamEscudoAction, "Escudo subido")} className="flex items-center gap-2">
+                  <form action={wrapAction(uploadTeamEscudoAction, "Escudo subido", onDataChange)} className="flex items-center gap-2">
                     <input type="hidden" name="id" value={t.id} />
                     <Input name="escudo" type="file" accept="image/*" className="max-w-[200px]" required />
                     <Button type="submit" size="sm" variant="secondary">
                       Subir escudo
                     </Button>
                   </form>
-                  <form action={wrapAction(deleteTeamAction, "Equipo eliminado")} onSubmit={(e) => { if (!confirm("¿Eliminar este equipo? Se borrarán sus jugadores.")) e.preventDefault() }}>
+                  <form action={wrapAction(deleteTeamAction, "Equipo eliminado", onDataChange)} onSubmit={(e) => { if (!confirm("¿Eliminar este equipo? Se borrarán sus jugadores.")) e.preventDefault() }}>
                     <input type="hidden" name="id" value={t.id} />
                     <Button type="submit" size="sm" variant="ghost" className="text-destructive">
                       Eliminar equipo
@@ -374,7 +376,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <CardTitle className="text-lg">Nuevo jugador</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={wrapAction(createPlayerAction, "Jugador agregado")} className="grid gap-3 sm:grid-cols-4">
+              <form action={wrapAction(createPlayerAction, "Jugador agregado", onDataChange)} className="grid gap-3 sm:grid-cols-4">
                 <div className="flex flex-col gap-1 sm:col-span-1">
                   <Label>Equipo</Label>
                   <select name="team_id" className="h-9 rounded-md border border-input bg-background px-2 text-sm" required>
@@ -420,7 +422,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                           {p.name}
                           {p.position ? ` — ${p.position}` : ""}
                         </span>
-                        <form action={wrapAction(deletePlayerAction, "Jugador eliminado")}>
+                        <form action={wrapAction(deletePlayerAction, "Jugador eliminado", onDataChange)}>
                           <input type="hidden" name="id" value={p.id} />
                           <Button variant="ghost" size="sm" type="submit" className="h-6 text-destructive">
                             Quitar
@@ -443,7 +445,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <CardTitle className="text-lg">Subir foto</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={wrapAction(uploadGalleryAction, "Foto subida")} className="grid gap-3 sm:grid-cols-2">
+              <form action={wrapAction(uploadGalleryAction, "Foto subida", onDataChange)} className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1">
                   <Label>Imagen</Label>
                   <Input name="photo" type="file" accept="image/*" required />
@@ -466,7 +468,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                 <img src={g.url || "/placeholder.svg"} alt={g.caption ?? "Foto"} className="aspect-square w-full object-cover" />
                 <div className="flex items-center justify-between gap-1 p-2">
                   <span className="truncate text-xs text-muted-foreground">{g.caption ?? "Sin título"}</span>
-                  <form action={wrapAction(deleteGalleryAction, "Foto eliminada")} onSubmit={(e) => { if (!confirm("¿Eliminar foto?")) e.preventDefault() }}>
+                  <form action={wrapAction(deleteGalleryAction, "Foto eliminada", onDataChange)} onSubmit={(e) => { if (!confirm("¿Eliminar foto?")) e.preventDefault() }}>
                     <input type="hidden" name="id" value={g.id} />
                     <Button variant="ghost" size="sm" type="submit" className="h-6 text-destructive">
                       X
@@ -485,7 +487,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <CardTitle className="text-lg">Crear Noticia</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={wrapAction(createNewsAction, "Noticia creada exitosamente")} className="grid gap-3 sm:grid-cols-2">
+              <form action={wrapAction(createNewsAction, "Noticia creada exitosamente", onDataChange)} className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1 sm:col-span-2">
                   <Label>Título</Label>
                   <Input name="title" placeholder="Ej. ¡Inscripciones abiertas!" required />
@@ -527,7 +529,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
               <Card key={n.id} className="overflow-hidden relative">
                 {n.youtube_id && !n.image_url && (
                   <div className="relative h-48 w-full bg-black">
-                    <img src={`https://img.youtube.com/vi/${n.youtube_id}/maxresdefault.jpg`} alt={n.title} className="h-full w-full object-cover opacity-80" />
+                     <Image src={`https://img.youtube.com/vi/${n.youtube_id}/maxresdefault.jpg`} alt={n.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover opacity-80" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M8 5v14l11-7z"/></svg>
@@ -536,12 +538,14 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                   </div>
                 )}
                 {n.image_url && (
-                  <img src={n.image_url} alt={n.title} className="h-48 w-full object-cover" />
+                   <div className="relative h-48 w-full">
+                     <Image src={n.image_url} alt={n.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+                   </div>
                 )}
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-4">
                     <CardTitle className="text-xl leading-tight">{n.title}</CardTitle>
-                    <form action={wrapAction(deleteNewsAction, "Noticia eliminada")} onSubmit={(e) => { if (!confirm("¿Eliminar esta noticia?")) e.preventDefault() }}>
+                    <form action={wrapAction(deleteNewsAction, "Noticia eliminada", onDataChange)} onSubmit={(e) => { if (!confirm("¿Eliminar esta noticia?")) e.preventDefault() }}>
                       <input type="hidden" name="id" value={n.id} />
                       <Button variant="ghost" size="sm" type="submit" className="h-8 text-destructive px-2">
                         X
@@ -595,7 +599,7 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
                             </td>
                             <td className="p-3 text-right">
                               {u.role !== 'admin' && (
-                                <form action={wrapAction(deleteUserAction, "Usuario eliminado")} onSubmit={(e) => { if (!confirm(`¿Eliminar definitivamente a ${u.display_name}? Se borrarán también todos sus pronósticos.`)) e.preventDefault() }}>
+                                <form action={wrapAction(deleteUserAction, "Usuario eliminado", onDataChange)} onSubmit={(e) => { if (!confirm(`¿Eliminar definitivamente a ${u.display_name}? Se borrarán también todos sus pronósticos.`)) e.preventDefault() }}>
                                   <input type="hidden" name="id" value={u.id} />
                                   <Button variant="destructive" size="sm" type="submit">
                                     Eliminar

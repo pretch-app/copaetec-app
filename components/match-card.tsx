@@ -7,16 +7,18 @@ import { formatDate, formatTime } from "@/lib/format"
 import { TeamBadge } from "@/components/team-badge"
 import { cn } from "@/lib/utils"
 import { useLiveMatch } from "@/hooks/use-live-match"
+import { useCurrentTime } from "@/hooks/use-current-time"
 
 export function MatchCard({ match: initialMatch }: { match: Match }) {
   const match = useLiveMatch(initialMatch)
+  const now = useCurrentTime()
   
   const finished = match.status === "finished"
   const homeWon = finished && (match.home_score ?? 0) > (match.away_score ?? 0)
   const awayWon = finished && (match.away_score ?? 0) > (match.home_score ?? 0)
   const draw = finished && match.home_score === match.away_score
   
-  const isLive = match.status === "scheduled" && match.kickoff && Date.now() >= new Date(match.kickoff).getTime()
+  const isLive = match.status === "scheduled" && match.kickoff && now !== null && now >= new Date(match.kickoff).getTime()
 
   const content = (
     <div className={cn(
@@ -49,7 +51,7 @@ export function MatchCard({ match: initialMatch }: { match: Match }) {
             <>
               <span className="flex items-center gap-1" suppressHydrationWarning>
                 <CalendarDays className="h-3.5 w-3.5" />
-                {formatDate(match.kickoff).split(',')[0]}
+                {formatDate(match.kickoff)}
               </span>
               <span className="flex items-center gap-1" suppressHydrationWarning>
                 <Clock className="h-3.5 w-3.5" />

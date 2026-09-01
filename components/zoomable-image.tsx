@@ -52,10 +52,12 @@ export function ZoomableImage({ src, alt, className, priority }: ZoomableImagePr
             className="relative w-full h-full flex items-center justify-center animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
+            <Image
               src={src}
               alt={alt}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              fill
+              sizes="100vw"
+              className="object-contain rounded-lg shadow-2xl"
             />
           </div>
         </div>

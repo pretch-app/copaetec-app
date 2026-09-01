@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Match, Prediction } from "@/lib/types"
 import { useLiveMatch } from "@/hooks/use-live-match"
+import { formatDate, formatTime } from "@/lib/format"
+import { useCurrentTime } from "@/hooks/use-current-time"
 import { toast } from "sonner"
 
 type PredictionCardProps = {
@@ -16,6 +18,7 @@ type PredictionCardProps = {
 
 export function PredictionCard({ match: initialMatch, prediction, disabled }: PredictionCardProps) {
   const match = useLiveMatch(initialMatch)
+  const now = useCurrentTime()
   const [isPending, setIsPending] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -37,13 +40,13 @@ export function PredictionCard({ match: initialMatch, prediction, disabled }: Pr
     }
   }
 
-  const isClosed = disabled || match.status === "finished" || (match.kickoff && Date.now() >= new Date(match.kickoff).getTime())
+  const isClosed = disabled || match.status === "finished" || (match.kickoff && now !== null && now >= new Date(match.kickoff).getTime())
 
   // Parse scores
   const predHome = prediction?.predicted_home ?? ""
   const predAway = prediction?.predicted_away ?? ""
   
-  const isCurrentlyLive = match.status === "scheduled" && match.kickoff && Date.now() >= new Date(match.kickoff).getTime()
+  const isCurrentlyLive = match.status === "scheduled" && match.kickoff && now !== null && now >= new Date(match.kickoff).getTime()
 
   return (
     <div className={`relative rounded-xl border p-4 transition-all duration-300 ${isClosed ? "bg-surface opacity-80" : "bg-surface-elevated hover:shadow-lg hover:border-primary/50"}`}>
@@ -73,9 +76,7 @@ export function PredictionCard({ match: initialMatch, prediction, disabled }: Pr
         </p>
         {match.kickoff && (
           <p className="text-xs text-muted-foreground" suppressHydrationWarning>
-            {new Date(match.kickoff).toLocaleString("es-AR", {
-              weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
-            })}
+            {formatDate(match.kickoff)} {formatTime(match.kickoff)}
           </p>
         )}
       </div>

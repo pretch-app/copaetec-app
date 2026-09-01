@@ -20,7 +20,7 @@ export function RankingTable({ ranking }: { ranking: ProdeRankingEntry[] }) {
           <th className="px-4 py-3 text-left font-semibold">Participante</th>
           <th className="px-4 py-3 text-center font-semibold">Puntos</th>
           <th className="px-4 py-3 text-center font-semibold hidden sm:table-cell">Plenos (5p)</th>
-          <th className="px-4 py-3 text-center font-semibold hidden sm:table-cell">Aciertos (2p/3p)</th>
+          <th className="px-4 py-3 text-center font-semibold hidden sm:table-cell">Aciertos de ganador (2p)</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-border">

@@ -9,11 +9,13 @@ type TimeLeft = {
   seconds: number
 }
 
-const TARGET_DATE = new Date("2026-08-14T13:00:00-03:00").getTime()
+const configuredTargetDate = process.env.NEXT_PUBLIC_TOURNAMENT_START_DATE
+const parsedTargetDate = configuredTargetDate ? Date.parse(configuredTargetDate) : NaN
+const TARGET_DATE = Number.isFinite(parsedTargetDate) ? parsedTargetDate : null
 
 function calculateTimeLeft(): TimeLeft {
   const now = Date.now()
-  const diff = Math.max(0, TARGET_DATE - now)
+  const diff = Math.max(0, (TARGET_DATE ?? now) - now)
 
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -67,14 +69,17 @@ export function CountdownTimer() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    const mountedTimer = setTimeout(() => setMounted(true), 0)
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft())
     }, 1000)
-    return () => clearInterval(timer)
+    return () => {
+      clearTimeout(mountedTimer)
+      clearInterval(timer)
+    }
   }, [])
 
-  const isEventStarted = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0
+  const isEventStarted = TARGET_DATE === null || (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0)
 
   if (!mounted) {
     return (

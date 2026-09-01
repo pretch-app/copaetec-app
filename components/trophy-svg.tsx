@@ -7,7 +7,8 @@ export function TrophySVG({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
-    setMounted(true)
+    const mountedTimer = setTimeout(() => setMounted(true), 0)
+    return () => clearTimeout(mountedTimer)
   }, [])
 
   return (

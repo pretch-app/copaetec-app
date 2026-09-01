@@ -16,6 +16,8 @@ En este frontend, copia `.env.example` como `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
+# Opcional: dejar comentada cuando el torneo ya comenzó
+# NEXT_PUBLIC_TOURNAMENT_START_DATE=2026-08-14T13:00:00-03:00
 ```
 
 Los archivos `.env*` locales están excluidos de Git. No subas credenciales al repositorio.
@@ -33,7 +35,7 @@ npm run dev
 Inicia el frontend en otra terminal:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -50,6 +52,24 @@ http://localhost:4000/api/auth/callback/google
 ```
 
 Si cambias el puerto del backend, actualiza también esta URI en Google Cloud y `NEXT_PUBLIC_API_URL`.
+
+## Despliegue en Vercel
+
+Configura en el proyecto frontend las siguientes variables de entorno:
+
+```env
+NEXT_PUBLIC_API_URL=https://tu-backend.example.com
+# Opcional, en formato ISO 8601 con zona horaria
+NEXT_PUBLIC_TOURNAMENT_START_DATE=2026-08-14T13:00:00-03:00
+```
+
+En el backend configura `FRONTEND_URL` y `ALLOWED_ORIGINS` con la URL HTTPS exacta del frontend. No uses `*`: las peticiones autenticadas utilizan cookies. La URI de callback de Google debe usar la URL pública del backend:
+
+```text
+https://tu-backend.example.com/api/auth/callback/google
+```
+
+El frontend usa `package-lock.json` como lockfile oficial; Vercel instalará las dependencias con npm.
 
 ## Desarrollo
 

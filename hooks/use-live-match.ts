@@ -9,23 +9,21 @@ export function useLiveMatch(initialMatch: Match) {
 
   // Keep in sync if initialMatch changes (e.g., from server actions)
   useEffect(() => {
-    setMatch(initialMatch)
+    const syncTimer = setTimeout(() => setMatch(initialMatch), 0)
+    return () => clearTimeout(syncTimer)
   }, [initialMatch])
 
   useEffect(() => {
-    // Only poll if the match is scheduled and kickoff is past or near (within 1 hour)
-    // Or if it's explicitly "scheduled" but clearly past time.
     const kickoffTime = match.kickoff ? new Date(match.kickoff).getTime() : 0
-    const isLiveOrSoon = match.status === "scheduled" && kickoffTime && (kickoffTime <= Date.now() + 60 * 60 * 1000)
+    if (match.status !== "scheduled" || !kickoffTime || Number.isNaN(kickoffTime)) return
 
-    if (!isLiveOrSoon) return
-
-    const interval = setInterval(async () => {
+    const poll = async () => {
+      if (kickoffTime > Date.now() + 60 * 60 * 1000) return
       try {
         const res = await fetch(apiUrl("/api/matches/live"))
         if (res.ok) {
-          const data = await res.json()
-          const updatedMatch = data.find((m: any) => m.id === match.id)
+          const data: Array<{ id: number; home_score: number | null; away_score: number | null; status: Match["status"] }> = await res.json()
+          const updatedMatch = data.find((m) => m.id === match.id)
           if (updatedMatch) {
             setMatch(prev => ({
               ...prev,
@@ -38,9 +36,19 @@ export function useLiveMatch(initialMatch: Match) {
       } catch (e) {
         // silently ignore polling errors
       }
-    }, 15000) // 15s
+    }
 
-    return () => clearInterval(interval)
+    const startPollingAfter = Math.max(0, kickoffTime - Date.now() - 60 * 60 * 1000)
+    const timeout = setTimeout(() => {
+      void poll()
+      interval = setInterval(() => void poll(), 15000)
+    }, startPollingAfter)
+    let interval: ReturnType<typeof setInterval> | undefined
+
+    return () => {
+      clearTimeout(timeout)
+      if (interval) clearInterval(interval)
+    }
   }, [match.id, match.status, match.kickoff])
 
   return match

@@ -21,7 +21,9 @@ function teamName(teams: Team[], id: number) {
   return teams.find((t) => t.id === id)?.name ?? "?"
 }
 
-function wrapAction(action: Function, successMessage: string) {
+type AdminAction = (formData: FormData) => Promise<{ error?: string; success?: boolean }>
+
+function wrapAction(action: AdminAction, successMessage: string, onSuccess: () => Promise<void>) {
   return async (formData: FormData) => {
     try {
       const result = await action(formData)
@@ -29,9 +31,10 @@ function wrapAction(action: Function, successMessage: string) {
         toast.error(result.error)
       } else if (result?.success || result === undefined) {
         toast.success(successMessage)
+        await onSuccess()
       }
-    } catch (e: any) {
-      toast.error(e.message || "Ocurrió un error")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Ocurrió un error")
     }
   }
 }
@@ -40,12 +43,14 @@ export function MatchEditorCard({
   match: m, 
   teams, 
   players, 
-  events 
+  events,
+  onDataChange,
 }: { 
   match: Match
   teams: Team[]
   players: Player[]
   events: MatchEvent[]
+  onDataChange: () => Promise<void>
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const matchGoals = events.filter((g) => g.match_id === m.id)
@@ -83,7 +88,7 @@ export function MatchEditorCard({
       {isExpanded && (
         <CardContent className="flex flex-col gap-6 border-t pt-6 bg-background">
           <div className="flex justify-end">
-             <form action={wrapAction(deleteMatchAction, "Partido eliminado")} onSubmit={(e) => { if (!confirm("¿Eliminar este partido?")) e.preventDefault() }}>
+              <form action={wrapAction(deleteMatchAction, "Partido eliminado", onDataChange)} onSubmit={(e) => { if (!confirm("¿Eliminar este partido?")) e.preventDefault() }}>
                <input type="hidden" name="id" value={m.id} />
                <Button variant="destructive" size="sm" type="submit">
                  Eliminar Partido
@@ -91,7 +96,7 @@ export function MatchEditorCard({
              </form>
           </div>
           
-          <form action={wrapAction(updateMatchResultAction, "Resultado actualizado")} className="grid gap-4 sm:grid-cols-2 rounded-md border border-border p-4 bg-muted/20">
+          <form action={wrapAction(updateMatchResultAction, "Resultado actualizado", onDataChange)} className="grid gap-4 sm:grid-cols-2 rounded-md border border-border p-4 bg-muted/20">
             <input type="hidden" name="id" value={m.id} />
             
             <div className="flex flex-col gap-1 sm:col-span-2">
@@ -147,7 +152,7 @@ export function MatchEditorCard({
 
           <div className="rounded-md border border-border p-3 flex flex-col gap-4">
             {/* Extras */}
-            <form action={wrapAction(updateMatchExtrasAction, "Detalles actualizados")} className="flex flex-col gap-2 p-2 bg-muted/30 rounded border border-border">
+            <form action={wrapAction(updateMatchExtrasAction, "Detalles actualizados", onDataChange)} className="flex flex-col gap-2 p-2 bg-muted/30 rounded border border-border">
               <input type="hidden" name="id" value={m.id} />
               <p className="text-sm font-semibold mb-1">Extras (Penales y Tiempo Extra)</p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -188,7 +193,7 @@ export function MatchEditorCard({
                          e.event_type === 'shootout_goal' ? '✅ Tanda Gol' : '❌ Tanda Fallo'}
                       </span>
                     </span>
-                    <form action={wrapAction(deleteMatchEventAction, "Evento eliminado")}>
+                    <form action={wrapAction(deleteMatchEventAction, "Evento eliminado", onDataChange)}>
                       <input type="hidden" name="id" value={e.id} />
                       <Button variant="ghost" size="sm" type="submit" className="h-6 text-destructive px-2">
                         Quitar
@@ -199,7 +204,7 @@ export function MatchEditorCard({
                 {matchGoals.length === 0 ? <li className="text-sm text-muted-foreground">Sin eventos cargados</li> : null}
               </ul>
               
-              <form action={wrapAction(addMatchEventAction, "Evento agregado")} className="grid gap-2 sm:grid-cols-6 p-2 border border-border rounded bg-muted/10">
+              <form action={wrapAction(addMatchEventAction, "Evento agregado", onDataChange)} className="grid gap-2 sm:grid-cols-6 p-2 border border-border rounded bg-muted/10">
                 <input type="hidden" name="match_id" value={m.id} />
                 
                 <div className="sm:col-span-2">

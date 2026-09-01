@@ -37,6 +37,14 @@ export default async function LlavesPage() {
       champion = finalMatch.home_name
     } else if ((finalMatch.away_score ?? 0) > (finalMatch.home_score ?? 0)) {
       champion = finalMatch.away_name
+    } else if (
+      finalMatch.home_penalties != null &&
+      finalMatch.away_penalties != null &&
+      finalMatch.home_penalties !== finalMatch.away_penalties
+    ) {
+      champion = finalMatch.home_penalties > finalMatch.away_penalties
+        ? finalMatch.home_name
+        : finalMatch.away_name
     }
   }
 

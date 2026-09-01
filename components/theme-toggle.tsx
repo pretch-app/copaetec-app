@@ -8,12 +8,15 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const stored = localStorage.getItem("theme") as "dark" | "light" | null
     const initial = stored || "dark"
-    setTheme(initial)
     document.documentElement.classList.toggle("dark", initial === "dark")
     document.documentElement.classList.toggle("light", initial === "light")
+    const mountedTimer = setTimeout(() => {
+      setTheme(initial)
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(mountedTimer)
   }, [])
 
   const toggle = () => {

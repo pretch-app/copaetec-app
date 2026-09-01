@@ -8,13 +8,14 @@ import { saveTournamentSettingsAction } from "@/lib/admin-actions"
 import type { TournamentSettings } from "@/lib/types"
 import { toast } from "sonner"
 
-export function TournamentConfig({ settings }: { settings: TournamentSettings }) {
+export function TournamentConfig({ settings, onDataChange }: { settings: TournamentSettings; onDataChange: () => Promise<void> }) {
   async function handleSubmit(formData: FormData) {
     const result = await saveTournamentSettingsAction(formData)
     if (result?.error) {
       toast.error(result.error)
     } else {
       toast.success("Configuración guardada")
+      await onDataChange()
     }
   }
 
@@ -47,7 +48,7 @@ export function TournamentConfig({ settings }: { settings: TournamentSettings })
                 <option value="both">Ambos (Pestañas de General y Grupos)</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Si eliges Fase de Grupos, recuerda asignarle un "Grupo" a cada equipo al crearlo o editarlo.
+                Si eliges Fase de Grupos, recuerda asignarle un &quot;Grupo&quot; a cada equipo al crearlo o editarlo.
               </p>
             </div>
 

@@ -56,7 +56,10 @@ export async function registerAction(_prev: any, formData: FormData) {
   const allowedDomainsEnv = process.env.ALLOWED_EMAIL_DOMAINS?.toLowerCase().trim()
   if (allowedDomainsEnv) {
     const allowedDomains = allowedDomainsEnv.split(',').map(d => d.trim())
-    const hasValidDomain = allowedDomains.some(domain => email.endsWith(domain))
+     const hasValidDomain = allowedDomains.some(domain => {
+       const normalizedDomain = domain.replace(/^@/, "")
+       return email.endsWith(`@${normalizedDomain}`)
+     })
     
     if (!hasValidDomain) {
       return { error: "Solo se permiten correos institucionales de la ETec/UM" }

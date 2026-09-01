@@ -88,10 +88,12 @@ export function GalleryGrid({ photos }: { photos: GalleryItem[] }) {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative w-full h-full flex items-center justify-center">
-                <img
+                <Image
                   src={photos[selectedPhoto].url}
                   alt={photos[selectedPhoto].caption ?? "Foto en grande"}
-                  className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                  fill
+                  sizes="100vw"
+                  className="object-contain rounded-lg shadow-2xl"
                 />
               </div>
               

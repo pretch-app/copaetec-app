@@ -181,7 +181,7 @@ export default async function HomePage() {
                     const badgeClass = badgeMap[n.color] || badgeMap.blue
 
                     return (
-                      <Link key={n.id} href="/noticias" className={`group relative flex flex-col overflow-hidden rounded-2xl border ${cardClass} backdrop-blur-sm transition-all hover:shadow-lg hover:-translate-y-1 animate-fade-up`} style={{ animationDelay: `${i * 100}ms` }}>
+                      <Link key={n.id} href={`/noticias/${n.id}`} className={`group relative flex flex-col overflow-hidden rounded-2xl border ${cardClass} backdrop-blur-sm transition-all hover:shadow-lg hover:-translate-y-1 animate-fade-up`} style={{ animationDelay: `${i * 100}ms` }}>
                         {n.image_url && (
                           <div className="relative aspect-video w-full overflow-hidden">
                             <Image src={n.image_url} alt={n.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />

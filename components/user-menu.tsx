@@ -63,26 +63,20 @@ export function UserMenu() {
           <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-border bg-background p-2 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 text-foreground">
 
             {user.role === "admin" && (
-              <Link href="/admin" onClick={() => setIsOpen(false)}>
-                <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-left hover:bg-primary/10 hover:text-primary transition-colors font-medium">
-                  <UserIcon className="h-4 w-4" />
-                  Panel Admin
-                </button>
+              <Link href="/admin" onClick={() => setIsOpen(false)} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-left hover:bg-primary/10 hover:text-primary transition-colors font-medium">
+                <UserIcon className="h-4 w-4" />
+                Panel Admin
               </Link>
             )}
 
-            <Link href="/perfil" onClick={() => setIsOpen(false)}>
-              <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-left hover:bg-muted transition-colors font-medium">
+            <Link href="/perfil" onClick={() => setIsOpen(false)} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-left hover:bg-muted transition-colors font-medium">
                 <UserIcon className="h-4 w-4" />
                 Mi Perfil
-              </button>
             </Link>
 
-            <Link href="/predicciones-etec/mis-predicciones" onClick={() => setIsOpen(false)}>
-              <button className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-left hover:bg-muted transition-colors font-medium">
+            <Link href="/predicciones-etec/mis-predicciones" onClick={() => setIsOpen(false)} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-left hover:bg-muted transition-colors font-medium">
                 <Trophy className="h-4 w-4" />
                 Mis Predicciones
-              </button>
             </Link>
 
             <div className="my-1 h-px bg-border" />

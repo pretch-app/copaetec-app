@@ -3,6 +3,11 @@
 import { apiUrl } from "./api"
 
 export type ApiResult<T = unknown> = { ok: true; data: T } | { ok: false; error: string; status: number }
+export const AUTH_STATE_CHANGED_EVENT = "auth-state-changed"
+
+export function notifyAuthStateChanged() {
+  window.dispatchEvent(new Event(AUTH_STATE_CHANGED_EVENT))
+}
 
 // Para Client Components: llama al backend con credenciales (cookie de sesión cross-origin).
 export async function apiClient<T = unknown>(
@@ -51,7 +56,9 @@ export async function getMe(): Promise<CurrentUser> {
 }
 
 export async function logout() {
-  return apiClient("/api/auth/logout", { method: "POST" })
+  const result = await apiClient("/api/auth/logout", { method: "POST" })
+  if (result.ok) notifyAuthStateChanged()
+  return result
 }
 
 export function googleLoginUrl() {

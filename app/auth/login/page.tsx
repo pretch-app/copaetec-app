@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { apiClient, googleLoginUrl } from "@/lib/api-client"
+import { apiClient, googleLoginUrl, notifyAuthStateChanged } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,7 @@ function LoginContent() {
       setError(result.error)
       return
     }
+    notifyAuthStateChanged()
     router.push("/predicciones-etec")
     router.refresh()
   }

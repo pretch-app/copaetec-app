@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { getMe, logout, type CurrentUser } from "@/lib/api-client"
+import { AUTH_STATE_CHANGED_EVENT, getMe, logout, type CurrentUser } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { LogOut, User as UserIcon, Trophy, ChevronDown } from "lucide-react"
 
@@ -14,10 +14,17 @@ export function UserMenu() {
   const router = useRouter()
 
   useEffect(() => {
-    getMe().then((u) => {
-      setUser(u)
-      setLoaded(true)
-    })
+    function updateUser() {
+      getMe().then((u) => {
+        setUser(u)
+        setLoaded(true)
+      })
+    }
+
+    updateUser()
+    window.addEventListener(AUTH_STATE_CHANGED_EVENT, updateUser)
+
+    return () => window.removeEventListener(AUTH_STATE_CHANGED_EVENT, updateUser)
   }, [])
 
   async function handleLogout() {

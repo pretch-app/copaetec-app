@@ -1,0 +1,11 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["lib"],
+  "entryPointStrategy": "expand",
+  "exclude": ["**/*.test.ts", "**/*.test.tsx"],
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "out": "docs/generated",
+  "readme": "none",
+  "sort": ["source-order"]
+}

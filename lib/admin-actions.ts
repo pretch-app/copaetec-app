@@ -2,7 +2,7 @@
 
 import { apiClient } from "./api-client"
 
-type ActionResult = { error?: string; success?: boolean }
+export type ActionResult = { error?: string; success?: boolean }
 
 function jsonBody(formData: FormData, keys: string[]) {
   const body: Record<string, unknown> = {}

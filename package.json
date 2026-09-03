@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "docs": "typedoc",
+    "docs:check": "typedoc --treatWarningsAsErrors",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint ."
   },
@@ -30,14 +34,20 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^24",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.4",
+    "jsdom": "^29.1.1",
+    "msw": "^2.15.0",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
-    "typescript": "5.7.3"
+    "typedoc": "^0.28.20",
+    "typescript": "5.7.3",
+    "vitest": "^5.0.0"
   },
   "overrides": {
     "hono": "4.13.5"

@@ -19,6 +19,7 @@ export async function apiClient<T = unknown>(
   const init: RequestInit = {
     method,
     credentials: "include",
+    cache: "no-store",
   }
 
   if (formData) {

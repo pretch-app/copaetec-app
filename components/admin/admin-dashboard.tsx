@@ -70,8 +70,12 @@ export function AdminDashboard({ teams, players, matches, events, gallery, setti
   const router = useRouter()
 
   async function handleLogout() {
-    await logout()
-    router.push("/")
+    const result = await logout()
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    router.replace("/")
     router.refresh()
   }
 

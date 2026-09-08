@@ -6,6 +6,7 @@ import Link from "next/link"
 import { AUTH_STATE_CHANGED_EVENT, getMe, logout, type CurrentUser } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { LogOut, User as UserIcon, Trophy, ChevronDown } from "lucide-react"
+import { toast } from "sonner"
 
 export function UserMenu() {
   const [user, setUser] = useState<CurrentUser>(null)
@@ -28,10 +29,14 @@ export function UserMenu() {
   }, [])
 
   async function handleLogout() {
-    await logout()
+    const result = await logout()
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
     setUser(null)
     setIsOpen(false)
-    router.push("/")
+    router.replace("/")
     router.refresh()
   }
 

@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   description:
     "Sitio oficial del torneo intercolegial de fútbol 6: fixture, resultados en vivo, tabla de posiciones, goleadores, estadísticas, planteles y galería.",
   keywords: ["fútbol", "torneo", "colegio", "etec", "fútbol 6", "deportes"],
+  applicationName: "Copa ETec 2026",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Copa ETec 2026",
+    statusBarStyle: "black-translucent",
+  },
   openGraph: {
     type: "website",
     locale: "es_AR",

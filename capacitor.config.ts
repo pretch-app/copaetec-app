@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 // Native Android shell for the Copa ETec 2026 site.
 // The UI is the deployed Next.js app; this project only wraps it as an installable app.
-const SITE_URL = 'https://copaetec.vercel.app'
+const SITE_URL = 'https://copaetec.online'
 
 const config: CapacitorConfig = {
   appId: 'com.copaetec.app',
@@ -16,6 +16,8 @@ const config: CapacitorConfig = {
     // so the backend session cookie lands in the same cookie jar). Anything else opens
     // in the system browser.
     allowNavigation: [
+      'copaetec.online',
+      'www.copaetec.online',
       'copaetec.vercel.app',
       'copaetec-backend.vercel.app',
       'accounts.google.com',

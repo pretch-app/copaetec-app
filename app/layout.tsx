@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_AR",
-    url: "https://copaetec.vercel.app",
+    url: "https://copaetec.online",
     title: "Copa ETec 2026",
     description: "Sitio oficial del torneo intercolegial de fútbol 6",
     siteName: "Copa ETec 2026"

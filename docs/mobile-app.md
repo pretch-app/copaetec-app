@@ -9,7 +9,7 @@ Dos formas de tener la Copa ETec como app en el celular:
 | iPhone (app real `.ipa`) | Proyecto iOS de Capacitor | Una Mac con Xcode + cuenta Apple Developer (USD 99/año) |
 
 En todos los casos la interfaz y los datos son los del sitio en producción
-(`https://copaetec.vercel.app`); la app no recompila Next.js ni guarda datos del torneo.
+(`https://copaetec.online`); la app no recompila Next.js ni guarda datos del torneo.
 
 ## iPhone / iPad (PWA)
 
@@ -19,7 +19,7 @@ en `public/icon-192.png`, `public/icon-512.png`, `public/icon-maskable-512.png` 
 
 Instalación en el iPhone:
 
-1. Abrir `https://copaetec.vercel.app` en **Safari** (no Chrome).
+1. Abrir `https://copaetec.online` en **Safari** (no Chrome).
 2. Botón **Compartir** → **Agregar a pantalla de inicio** → **Agregar**.
 3. Queda con ícono propio, a pantalla completa y con su tarjeta en el selector de apps.
 
